@@ -7,6 +7,7 @@ from dataBase import AsyncSessionLocal
 from models import User
 from datetime import datetime
 import json
+import logging
 
 app = FastAPI()
 
@@ -14,6 +15,9 @@ PORT = int(os.getenv("PORT", 3000))
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN")
 
 
+logging.basicConfig(level=logging.INFO)
+
+print("App starting...")
 # 🔹 GET route for webhook verification
 @app.get("/")
 async def verify_webhook(
