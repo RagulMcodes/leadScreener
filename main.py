@@ -1,6 +1,10 @@
 from fastapi import FastAPI, Request, Query, Response
 from fastapi.responses import PlainTextResponse
 import os
+from fastapi import FastAPI, Request
+from sqlalchemy.future import select
+from dataBase import AsyncSessionLocal
+from models import User
 from datetime import datetime
 import json
 
@@ -17,20 +21,39 @@ async def verify_webhook(
     hub_challenge: str = Query(None, alias="hub.challenge"),
     hub_verify_token: str = Query(None, alias="hub.verify_token")
 ):
+    print("Mode:", hub_mode)
+    print("Received Token:", hub_verify_token)
+    print("Expected Token:", VERIFY_TOKEN)
+
     if hub_mode == "subscribe" and hub_verify_token == VERIFY_TOKEN:
         print("WEBHOOK VERIFIED")
-        return PlainTextResponse(content=hub_challenge, status_code=200)
-    else:
-        return Response(status_code=403)
+        return PlainTextResponse(hub_challenge)
+
+    return Response(status_code=403)
 
 
-# 🔹 POST route for receiving messages
+
 @app.post("/")
-async def receive_webhook(request: Request):
+async def receive_message(request: Request):
     body = await request.json()
 
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    print(f"\n\nWebhook received {timestamp}\n")
-    print(json.dumps(body, indent=2))
+    value = body.get("entry", [{}])[0].get("changes", [{}])[0].get("value", {})
 
-    return Response(status_code=200)
+    if "messages" in value:
+        message = value["messages"][0]
+        phone = message["from"]
+        text = message["text"]["body"]
+
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(select(User).where(User.phone_number == phone))
+            user = result.scalar_one_or_none()
+
+            if not user:
+                user = User(phone_number=phone)
+                session.add(user)
+                await session.commit()
+                print("New user created")
+            else:
+                print("Existing user:", user.state)
+
+    return {"status": "ok"}
