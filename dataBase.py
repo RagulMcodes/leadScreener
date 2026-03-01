@@ -2,8 +2,9 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 import os
 
-DATABASE_URL = os.getenv("DATABASE_URL")
 
+DATABASE_URL = os.getenv("DATABASE_URL")
+print("DATABASE_URL exists:", "DATABASE_URL" in os.environ)
 engine = create_async_engine(
     DATABASE_URL,
     echo=True,
