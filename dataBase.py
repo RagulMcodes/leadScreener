@@ -27,11 +27,11 @@ def addUser(num) -> None:
     supabase.table("main").insert({"phone_number": num}).execute()
 
 def updateUser(phone, field, value, next_state):
-    supabase.table("users").update({
+    supabase.table("main").update({
         field: value,
         "state": next_state
     }).eq("phone", phone).execute()
 
 def getUser(phone):
-    response = supabase.table("users").select("*").eq("phone", phone).execute()
+    response = supabase.table("main").select("*").eq("phone", phone).execute()
     return response.data[0] if response.data else None
