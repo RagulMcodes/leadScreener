@@ -1,17 +1,37 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+
 import os
+from supabase import create_client, Client
+from dotenv import load_dotenv
 
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-print("DATABASE_URL exists:", "DATABASE_URL" in os.environ)
-engine = create_async_engine(
-    DATABASE_URL,
-    echo=True,
-)
+load_dotenv()
+url: str = os.environ.get("SUPABASE_URL")
+key: str = os.environ.get("SUPABASE_KEY")
+supabase: Client = create_client(url, key)
 
-AsyncSessionLocal = sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
-    expire_on_commit=False
-)
+
+
+def ifNewUser(num) -> bool:
+    response = (
+        supabase.table("main")
+        .select("phone_number")
+        .eq("phone_number", num)
+        .limit(1)
+        .execute()
+    )
+    return bool(response.data)
+
+
+
+def addUser(num) -> None:
+    supabase.table("main").insert({"phone_number": num}).execute()
+
+def updateUser(phone, field, value, next_state):
+    supabase.table("users").update({
+        field: value,
+        "state": next_state
+    }).eq("phone", phone).execute()
+
+def getUser(phone):
+    response = supabase.table("users").select("*").eq("phone", phone).execute()
+    return response.data[0] if response.data else None

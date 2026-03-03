@@ -3,8 +3,8 @@ from fastapi.responses import PlainTextResponse
 import os
 from fastapi import FastAPI, Request
 from sqlalchemy.future import select
-from dataBase import AsyncSessionLocal
-from models import User
+import dataBase
+import models
 from datetime import datetime
 import json
 import logging
@@ -46,18 +46,35 @@ async def receive_message(request: Request):
     if "messages" in value:
         message = value["messages"][0]
         phone = message["from"]
-        text = message["text"]["body"]
+        if not dataBase.ifNewUser(phone):
+            dataBase.addUser(phone)
+            await models.send_question(phone, 1)
 
-        async with AsyncSessionLocal() as session:
-            result = await session.execute(select(User).where(User.phone_number == phone))
-            user = result.scalar_one_or_none()
+            # Detect message type
+        if "text" in message:
+            user_input = message["text"]["body"]
 
-            if not user:
-                user = User(phone_number=phone)
-                session.add(user)
-                await session.commit()
-                print("New user created")
+        elif "interactive" in message:
+            if "button_reply" in message["interactive"]:
+                user_input = message["interactive"]["button_reply"]["id"]
+            elif "list_reply" in message["interactive"]:
+                user_input = message["interactive"]["list_reply"]["id"]
             else:
-                print("Existing user:", user.state)
+                return {"status": "ignored"}
 
-    return {"status": "ok"}
+        else:
+            return {"status": "ignored"}
+
+        user = dataBase.getUser(phone)
+        current_state = user["state"]
+
+        field = models.QUESTIONS[current_state]["field"]
+        next_state = current_state + 1
+        dataBase.updateUser(phone, field, user_input, next_state)
+        await models.send_question(phone, next_state)
+
+
+
+
+
+
