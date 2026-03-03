@@ -41,6 +41,7 @@ async def verify_webhook(
 async def receive_message(request: Request):
     body = await request.json()
 
+
     value = body.get("entry", [{}])[0].get("changes", [{}])[0].get("value", {})
 
     if "messages" in value:

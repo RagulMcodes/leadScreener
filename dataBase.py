@@ -30,8 +30,8 @@ def updateUser(phone, field, value, next_state):
     supabase.table("main").update({
         field: value,
         "state": next_state
-    }).eq("phone", phone).execute()
+    }).eq("phone_number", phone).execute()
 
 def getUser(phone):
-    response = supabase.table("main").select("*").eq("phone", phone).execute()
+    response = supabase.table("main").select("*").eq("phone_number", phone).execute()
     return response.data[0] if response.data else None
