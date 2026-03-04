@@ -67,7 +67,7 @@ async def receive_message(request: Request):
             return {"status": "ignored"}
 
         user = dataBase.getUser(phone)
-        current_state = user["state"]
+        current_state = user["State"]
 
         field = models.QUESTIONS[current_state]["field"]
         next_state = current_state + 1
