@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Loan Application</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f9;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+
+.container{
+background:white;
+padding:30px;
+width:420px;
+border-radius:10px;
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+h2{
+text-align:center;
+margin-bottom:20px;
+}
+
+label{
+display:block;
+margin-top:14px;
+font-weight:bold;
+}
+
+input,select,textarea{
+width:100%;
+padding:10px;
+margin-top:6px;
+border:1px solid #ccc;
+border-radius:6px;
+}
+
+button{
+margin-top:20px;
+width:100%;
+padding:12px;
+background:#2563eb;
+border:none;
+color:white;
+font-size:16px;
+border-radius:6px;
+cursor:pointer;
+}
+
+#successScreen{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:white;
+display:none;
+justify-content:center;
+align-items:center;
+font-size:30px;
+font-weight:bold;
+color:green;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Loan Application</h2>
+
+<form id="loanForm">
+
+<input type="hidden" id="phone">
+
+<label>Name *</label>
+<input type="text" id="Name" required>
+
+<label>Age *</label>
+<input type="number" id="age" required>
+
+<label>Area *</label>
+<input type="text" id="Area" required>
+
+<label>Loan Type *</label>
+<select id="Loan_Type" required>
+<option value="">Select</option>
+<option>Flat</option>
+<option>Plot</option>
+<option>Individual Home</option>
+<option>Construction</option>
+</select>
+
+<label>Have you checked CIBIL? *</label>
+<select id="Cibil_checked" required>
+<option value="">Select</option>
+<option value="true">Yes</option>
+<option value="false">No</option>
+</select>
+
+<label>Is the property approved? *</label>
+<select id="is_property_approved" required>
+<option value="">Select</option>
+<option value="true">Yes</option>
+<option value="false">Not yet</option>
+</select>
+
+<label>Existing loans / EMI *</label>
+<textarea id="existing_loans" required></textarea>
+
+<button type="submit">Submit</button>
+
+</form>
+
+</div>
+
+<div id="successScreen">
+Form Submitted ✓
+</div>
+
+<script>
+
+const webhook="https://3775-49-200-129-70.ngrok-free.app/googleForm"
+
+/* phone number from whatsapp link */
+const params=new URLSearchParams(window.location.search)
+const phone = "916379805626"
+document.getElementById("phone").value = phone
+
+document.getElementById("loanForm").addEventListener("submit",async function(e){
+
+e.preventDefault()
+
+const data = {
+phone_number: document.getElementById("phone").value,
+Name: document.getElementById("Name").value,
+age: parseInt(document.getElementById("age").value),
+Area: document.getElementById("Area").value,
+Loan_Type: document.getElementById("Loan_Type").value,
+Cibil_checked: document.getElementById("Cibil_checked").value === "true",
+is_property_approved: document.getElementById("is_property_approved").value === "true",
+existing_loans: document.getElementById("existing_loans").value
+}
+
+console.log(data)
+
+await fetch(webhook,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(data)
+})
+
+document.querySelector(".container").style.display="none"
+document.getElementById("successScreen").style.display="flex"
+
+})
+
+</script>
+
+</body>
+</html>
