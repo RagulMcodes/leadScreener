@@ -1,85 +1,51 @@
-import asyncio
-
-QUESTIONS = {
-    1: {
-        "field": "Name",
-        "type": "text",
-        "question": "What is your full name?"
-    },
-    2: {
-        "field": "age",
-        "type": "text",
-        "question": "What is your age?"
-    },
-    3: {
-        "field": "Area",
-        "type": "text",
-        "question": "Which area are you looking for the loan in?"
-    },
-    4: {
-        "field": "Loan_Type",
-        "type": "mcq",
-        "question": "Select loan type:",
-        "options": [
-            {"id": "flat", "label": "Flat"},
-            {"id": "plot", "label": "Plot"},
-            {"id": "individual_home", "label": "Individual Home"},
-            {"id": "construction", "label": "Construction"}
-        ]
-    },
-    5: {
-        "field": "employment_type",
-        "type": "mcq",
-        "question": "Are you salaried or self-employed?",
-        "options": [
-            {"id": "salaried", "label": "Salaried"},
-            {"id": "self_employed", "label": "Self-Employed"}
-        ]
-    },
-    6: {
-        "field": "salary_credit_type",
-        "type": "mcq",
-        "question": "How do you receive salary?",
-        "options": [
-            {"id": "bank", "label": "Bank Credit"},
-            {"id": "cash", "label": "Cash"}
-        ]
-    },
-    7: {
-        "field": "is_property_approved",
-        "type": "mcq",
-        "question": "Is the property approved?",
-        "options": [
-            {"id": "yes", "label": "Yes"},
-            {"id": "no", "label": "No"}
-        ]
-    },
-    8: {
-        "field": "existing_loans and EMIs",
-        "type": "text",
-        "question": "Do you have existing loans and EMIs? Please specify."
-    },
-    9: {
-        "field": "Cibil_checked?",
-        "type": "mcq",
-        "question": "What are your current EMI details?",
-        "options": [
-            {"id": "yes", "label": "Yes"},
-            {"id": "no", "label": "No"}
-        ]
-    }
-}
-
+from dotenv import load_dotenv
 import httpx
 import os
+import requests
 
+load_dotenv()
 ACCESS_TOKEN = os.getenv("WHATSAPP_TOKEN")
 PHONE_NUMBER_ID = os.getenv("PHONE_NUMBER_ID")
 
-WHATSAPP_URL = f"https://graph.facebook.com/v19.0/{PHONE_NUMBER_ID}/messages"
+async def send_whatsapp_message(phone: object) -> None:
+
+    WHATSAPP_URL = f"https://graph.facebook.com/v19.0/{PHONE_NUMBER_ID}/messages"
+    headers = {
+        "Authorization": f"Bearer {ACCESS_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "messaging_product": "whatsapp",
+        "to": phone,
+        "type": "text",
+        "text": {
+            "body": "please fill this form: https://rococo-salmiakki-9a4773.netlify.app/"
+        }
+    }
+
+    response = requests.post(WHATSAPP_URL, headers=headers, json=payload)
+
+    print(response.status_code)
+    print(response.text)
 
 
-async def send_whatsapp_message(payload):
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''async def send_whatsapp_message(payload):
     headers = {
         "Authorization": f"Bearer {ACCESS_TOKEN}",
         "Content-Type": "application/json"
@@ -169,6 +135,6 @@ async def send_question(phone, state):
 
     if q["type"] == "mcq":
         if len(q["options"]) <= 3:
-            return await send_buttons(phone, q["question"], q["options"])
+             await send_buttons(phone, q["question"], q["options"])
         else:
-            return await send_list(phone, q["question"], q["options"])
+             await send_list(phone, q["question"], q["options"])'''
